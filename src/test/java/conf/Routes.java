@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 
 import controllers.ExampleController;
 import net.zileo.ninja.auth0.Auth0Routes;
-import net.zileo.ninja.auth0.AuthenticatedFilter;
+import net.zileo.ninja.auth0.AuthenticateFilter;
 import ninja.Router;
 import ninja.application.ApplicationRoutes;
 
@@ -37,12 +37,12 @@ public class Routes implements ApplicationRoutes {
         router.GET().route("/").with(ExampleController::index);
         
         router.GET().route("/helloPublic").with(ExampleController::helloPublic);
-        router.GET().route("/helloPrivate").filters(AuthenticatedFilter.class).with(ExampleController::helloPrivate);
-        router.GET().route("/helloSubject").filters(AuthenticatedFilter.class).with(ExampleController::helloSubject);
+        router.GET().route("/helloPrivate").filters(AuthenticateFilter.class).with(ExampleController::helloPrivate);
+        router.GET().route("/helloSubject").filters(AuthenticateFilter.class).with(ExampleController::helloSubject);
 
         router.GET().route("/helloPublic.json").with(ExampleController::helloPublicJson);
-        router.GET().route("/helloPrivate.json").filters(AuthenticatedFilter.class).with(ExampleController::helloPrivateJson);
-        router.GET().route("/helloSubject.json").filters(AuthenticatedFilter.class).with(ExampleController::helloSubjectJson);
+        router.GET().route("/helloPrivate.json").filters(AuthenticateFilter.class).with(ExampleController::helloPrivateJson);
+        router.GET().route("/helloSubject.json").filters(AuthenticateFilter.class).with(ExampleController::helloSubjectJson);
     }
 
 }

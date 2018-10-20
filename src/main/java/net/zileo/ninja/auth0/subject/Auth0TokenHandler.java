@@ -1,8 +1,5 @@
 package net.zileo.ninja.auth0.subject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -17,8 +14,6 @@ import ninja.Context;
  * @author jlannoy
  */
 public abstract class Auth0TokenHandler<P extends Subject> {
-
-    private final static Logger logger = LoggerFactory.getLogger(Auth0TokenHandler.class);
 
     public final static String CLAIM_SUBJECT = "sub";
 
@@ -36,6 +31,8 @@ public abstract class Auth0TokenHandler<P extends Subject> {
     /**
      * Extracts the user id from the Json Web Token.
      * 
+     * @param jwt
+     *            a JSON Web Token
      * @return a user id
      */
     public static String getUserId(DecodedJWT jwt) {
@@ -43,29 +40,56 @@ public abstract class Auth0TokenHandler<P extends Subject> {
     }
 
     /**
-     * Checks the ID Token, decodes it, then call {@link Auth0TokenHandler#buildSubjectFromJWT(DecodedJWT)}.
+     * Checks the ID Token, decodes it, then call {@link Auth0TokenHandler#buildSubjectFromJWT(DecodedJWT, String)}.
      * 
+     * @param context
+     *            Ninja's current context
+     * @throws IllegalArgumentException
+     *             if a mandatory data is missing
      * @return authenticated User
      */
-    public P buildSubject(Context context) {
-        String idToken = context.getSession().get(Auth0Controller.SESSION_ID_TOKEN);
+    public final P buildSubject(Context context) throws IllegalArgumentException {
+        return this.buildSubject(context.getSession().get(Auth0Controller.SESSION_ID_TOKEN));
+    }
+
+    /**
+     * Checks the ID Token, decodes it, then call {@link Auth0TokenHandler#buildSubjectFromJWT(DecodedJWT, String)}.
+     * 
+     * @param idToken
+     *            Auth0 Id Token
+     * @throws IllegalArgumentException
+     *             if a mandatory data is missing
+     * @return authenticated User
+     */
+    public final P buildSubject(String idToken) throws IllegalArgumentException {
         if (idToken == null) {
-            logger.warn("Trying to generate profile while no ID TOKEN in current session.");
-            return null;
+            throw new IllegalArgumentException("No Id Token provided");
         }
 
         DecodedJWT jwt = JWT.decode(idToken);
         if (jwt == null) {
-            logger.warn("Unable to decode current ID TOKEN.");
-            return null;
+            throw new IllegalArgumentException("Unable to decode provided Id Token");
         }
 
-        return buildSubjectFromJWT(jwt, getUserId(jwt));
+        String userId = getUserId(jwt);
+        if (userId == null) {
+            throw new IllegalArgumentException("No User Id in provided Id Token");
+        }
+
+        P subject = buildSubjectFromJWT(jwt, getUserId(jwt));
+        if (subject == null) {
+            throw new IllegalArgumentException("Unable to create Subject from provided Id Token");
+        }
+        return subject;
     }
 
     /**
      * Implement this method to build your Subject.
      * 
+     * @param jwt
+     *            a JSON Web Token
+     * @param userId
+     *            user id (as a String)
      * @return authenticated User
      */
     public abstract P buildSubjectFromJWT(DecodedJWT jwt, String userId);
@@ -73,6 +97,10 @@ public abstract class Auth0TokenHandler<P extends Subject> {
     /**
      * Creates a fake web token (for the simulated dev/test action).
      * 
+     * @param value
+     *            a user id or email (depending on client choice)
+     * @param algorithm
+     *            algorithm to sign the JSON Web Token
      * @return a JWT
      */
     public String buildSimulatedJWT(String value, Algorithm algorithm) {

@@ -4,8 +4,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
-import ninja.exceptions.BadRequestException;
-
 /**
  * Same as {@link Auth0TokenHandler} but with a little shortcut allowing to generate a Subject based on a given verified email address.
  * 
@@ -30,6 +28,8 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
     /**
      * Extracts the user email address from the Json Web Token.
      * 
+     * @param jwt
+     *            a JSON Web Token
      * @return an email address
      */
     public static String getEmail(DecodedJWT jwt) {
@@ -39,6 +39,8 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
     /**
      * Extracts the fact that the email address used by the user to register Auth0 has already been validated.
      * 
+     * @param jwt
+     *            a JSON Web Token
      * @return true if already verified
      */
     public static boolean isVerifiedEmail(DecodedJWT jwt) {
@@ -52,7 +54,7 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
     public P buildSubjectFromJWT(DecodedJWT jwt, String userId) {
 
         if (!isVerifiedEmail(jwt)) {
-            throw new BadRequestException("Booh!");
+            throw new IllegalArgumentException("E-mail adress not (yet) verified");
         }
 
         return buildSubjectFromEmail(jwt, userId, getEmail(jwt));
@@ -61,6 +63,12 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
     /**
      * Implement this method to build your Subject from a verified e-mail address.
      * 
+     * @param jwt
+     *            a JSON Web Token
+     * @param userId
+     *            user id
+     * @param email
+     *            user email
      * @return authenticated User
      */
     public abstract P buildSubjectFromEmail(DecodedJWT jwt, String userId, String email);
@@ -68,6 +76,10 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
     /**
      * Creates a fake web token (for the simulated dev/test action).
      * 
+     * @param value
+     *            a user id or email (depending on client choice)
+     * @param algorithm
+     *            algorithm to sign the JSON Web Token
      * @return a JWT
      */
     @Override

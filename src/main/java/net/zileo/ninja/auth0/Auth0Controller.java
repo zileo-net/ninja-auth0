@@ -16,7 +16,8 @@ import ninja.Context;
 import ninja.Result;
 import ninja.Results;
 import ninja.ReverseRouter;
-import ninja.exceptions.NinjaException;
+import ninja.exceptions.ForbiddenRequestException;
+import ninja.exceptions.InternalServerErrorException;
 import ninja.jpa.UnitOfWork;
 import ninja.params.PathParam;
 import ninja.session.Session;
@@ -28,8 +29,6 @@ import ninja.session.Session;
  */
 public class Auth0Controller {
 
-    public static final String SESSION_ACCESS_TOKEN = "access_token";
-
     public static final String SESSION_ID_TOKEN = "id_token";
 
     public static final String SESSION_TARGET_URL = "target_url";
@@ -37,12 +36,12 @@ public class Auth0Controller {
     @Inject
     private ReverseRouter reverseRouter;
 
-    @Inject
+    @Inject(optional = true)
     @Named("auth0.loggedOut")
     private String loggedOutPage;
 
     @Inject
-    Auth0TokenHandler<? extends Subject> tokenHandler;
+    private Auth0TokenHandler<? extends Subject> tokenHandler;
 
     private AuthAPI auth;
 
@@ -63,6 +62,12 @@ public class Auth0Controller {
 
     /**
      * Redirect user to the Auth0 login page of the configured Auth0 domain.
+     * 
+     * @param context
+     *            current Ninja's context
+     * @param session
+     *            current Ninja's session
+     * @return a request Result
      */
     @UnitOfWork
     public Result login(Context context, Session session) {
@@ -71,22 +76,35 @@ public class Auth0Controller {
 
     /**
      * Callback called by Auth0 once a user has been authenticated. The Auth0 code will be exchanged with an id token.
+     * 
+     * @param context
+     *            current Ninja's context
+     * @param session
+     *            current Ninja's session
+     * @return a request Result
      */
     @UnitOfWork
     public Result callback(Context context, Session session) {
 
         if (context.getParameter("error") != null) {
-            throw new NinjaException(Result.SC_401_UNAUTHORIZED, context.getParameter("error_description"));
+            throw new ForbiddenRequestException(context.getParameter("error_description"));
         }
 
         if (context.getParameter("code") == null) {
-            throw new NinjaException(Result.SC_401_UNAUTHORIZED, "No authorization code received.");
+            throw new ForbiddenRequestException("No authorization code received");
         }
 
         try {
 
             TokenHolder token = auth.exchangeCode(context.getParameter("code"), getCallbackUrl(context)).execute();
-            session.put(SESSION_ACCESS_TOKEN, token.getAccessToken());
+
+            // Check that we are able to provision one Subject from the received id token
+            try {
+                tokenHandler.buildSubject(token.getIdToken());
+            } catch (IllegalArgumentException e) {
+                throw new ForbiddenRequestException(e.getMessage(), e);
+            }
+
             session.put(SESSION_ID_TOKEN, token.getIdToken());
             session.setExpiryTime(token.getExpiresIn() * 1000);
 
@@ -94,16 +112,25 @@ public class Auth0Controller {
             return Results.redirect(targetUrl == null ? "/" : targetUrl);
 
         } catch (Auth0Exception e) {
-            throw new NinjaException(Result.SC_500_INTERNAL_SERVER_ERROR, e.getMessage());
+            throw new InternalServerErrorException(e.getMessage());
         }
 
     }
 
+    /**
+     * Redirects to the Auth0 log out URL.
+     * 
+     * @param context
+     *            current Ninja's context
+     * @param session
+     *            current Ninja's session
+     * @return a request Result
+     */
     @UnitOfWork
     public Result logout(Context context, Session session) {
         String redirectUrl = reverseRouter.with(Auth0Controller::loggedOut).absolute(context).build();
 
-        if (session.get(SESSION_ID_TOKEN) != null && session.get(SESSION_ACCESS_TOKEN) != null) {
+        if (session.get(SESSION_ID_TOKEN) != null) {
             session.clear();
             return Results.redirect(auth.logoutUrl(redirectUrl, true).useFederated(true).build());
 
@@ -114,6 +141,13 @@ public class Auth0Controller {
 
     }
 
+    /**
+     * Callback page once Auth0 as logged out current user.
+     * 
+     * @param context
+     *            current Ninja's context
+     * @return a request Result
+     */
     @UnitOfWork
     public Result loggedOut(Context context) {
         if (loggedOutPage != null) {
@@ -123,6 +157,17 @@ public class Auth0Controller {
         }
     }
 
+    /**
+     * Simulates a user authentication without calling Auth0.
+     * 
+     * @param context
+     *            current Ninja's context
+     * @param session
+     *            current Ninja's session
+     * @param value
+     *            a user id or email to simulate
+     * @return a request Result
+     */
     @UnitOfWork
     public Result simulate(Context context, Session session, @PathParam("value") String value) {
         session.put(SESSION_ID_TOKEN, tokenHandler.buildSimulatedJWT(value, algorithm));

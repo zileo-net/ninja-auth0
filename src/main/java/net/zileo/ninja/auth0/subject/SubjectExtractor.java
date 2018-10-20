@@ -2,6 +2,7 @@ package net.zileo.ninja.auth0.subject;
 
 import com.google.inject.Inject;
 
+import net.zileo.ninja.auth0.AuthenticateFilter;
 import ninja.Context;
 import ninja.params.ArgumentExtractor;
 
@@ -16,6 +17,9 @@ public class SubjectExtractor implements ArgumentExtractor<Subject> {
 
     /**
      * Constructor.
+     * 
+     * @param tokenHandler
+     *            client implementation of a token handler
      */
     @Inject
     public SubjectExtractor(Auth0TokenHandler<? extends Subject> tokenHandler) {
@@ -27,7 +31,18 @@ public class SubjectExtractor implements ArgumentExtractor<Subject> {
      */
     @Override
     public Subject extract(Context context) {
-        return this.tokenHandler.buildSubject(context);
+
+        // Check first if the job has already been done by an AuthenticateFilter
+        if (context.getAttribute(AuthenticateFilter.SUBJECT_CTX_KEY) != null) {
+            return context.getAttribute(AuthenticateFilter.SUBJECT_CTX_KEY, Subject.class);
+        }
+
+        try {
+            return this.tokenHandler.buildSubject(context);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+
     }
 
     /**

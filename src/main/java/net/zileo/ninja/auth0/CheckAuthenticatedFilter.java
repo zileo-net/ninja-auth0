@@ -14,7 +14,7 @@ import ninja.ReverseRouter;
  * 
  * @author jlannoy
  */
-public class AuthenticatedFilter implements Filter {
+public class CheckAuthenticatedFilter implements Filter {
 
     @Inject
     private ReverseRouter reverseRouter;
