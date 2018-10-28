@@ -1,4 +1,4 @@
-package net.zileo.ninja.auth0;
+package net.zileo.ninja.auth0.controllers;
 
 import java.io.UnsupportedEncodingException;
 
@@ -10,7 +10,7 @@ import com.auth0.json.auth.TokenHolder;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.google.inject.Inject;
 
-import net.zileo.ninja.auth0.subject.Auth0TokenHandler;
+import net.zileo.ninja.auth0.handlers.Auth0TokenHandler;
 import net.zileo.ninja.auth0.subject.Subject;
 import ninja.Context;
 import ninja.Result;
@@ -18,7 +18,6 @@ import ninja.Results;
 import ninja.ReverseRouter;
 import ninja.exceptions.ForbiddenRequestException;
 import ninja.exceptions.InternalServerErrorException;
-import ninja.jpa.UnitOfWork;
 import ninja.params.PathParam;
 import ninja.session.Session;
 
@@ -34,7 +33,7 @@ public class Auth0Controller {
     public static final String SESSION_TARGET_URL = "target_url";
 
     @Inject
-    private ReverseRouter reverseRouter;
+    protected ReverseRouter reverseRouter;
 
     @Inject(optional = true)
     @Named("auth0.loggedOut")
@@ -52,12 +51,36 @@ public class Auth0Controller {
                      @Named("auth0.clientId") String clientId,
                      @Named("auth0.clientSecret") String clientSecret)
             throws IllegalArgumentException, UnsupportedEncodingException {
+
         this.auth = new AuthAPI(domain, clientId, clientSecret);
         this.algorithm = Algorithm.HMAC256(clientSecret);
+
     }
 
-    private String getCallbackUrl(Context context) {
+    /**
+     * Get configured Auth0 callback route.
+     * 
+     * @param context
+     *            current Ninja's context
+     * @return callbak path
+     */
+    protected String getCallbackUrl(Context context) {
+
         return reverseRouter.with(Auth0Controller::callback).absolute(context).build();
+
+    }
+    
+    /**
+     * Get configured Auth0 logged out route.
+     * 
+     * @param context
+     *            current Ninja's context
+     * @return callbak path
+     */
+    protected String getLoggedOutUrl(Context context) {
+
+        return reverseRouter.with(Auth0Controller::loggedOut).absolute(context).build();
+
     }
 
     /**
@@ -69,7 +92,6 @@ public class Auth0Controller {
      *            current Ninja's session
      * @return a request Result
      */
-    @UnitOfWork
     public Result login(Context context, Session session) {
         return Results.redirect(auth.authorizeUrl(getCallbackUrl(context)).withResponseType("code").withScope(tokenHandler.getScope()).build());
     }
@@ -83,7 +105,6 @@ public class Auth0Controller {
      *            current Ninja's session
      * @return a request Result
      */
-    @UnitOfWork
     public Result callback(Context context, Session session) {
 
         if (context.getParameter("error") != null) {
@@ -100,9 +121,13 @@ public class Auth0Controller {
 
             // Check that we are able to provision one Subject from the received id token
             try {
+
                 tokenHandler.buildSubject(token.getIdToken());
+
             } catch (IllegalArgumentException e) {
+
                 throw new ForbiddenRequestException(e.getMessage(), e);
+
             }
 
             session.put(SESSION_ID_TOKEN, token.getIdToken());
@@ -112,7 +137,9 @@ public class Auth0Controller {
             return Results.redirect(targetUrl == null ? "/" : targetUrl);
 
         } catch (Auth0Exception e) {
+
             throw new InternalServerErrorException(e.getMessage());
+
         }
 
     }
@@ -126,17 +153,15 @@ public class Auth0Controller {
      *            current Ninja's session
      * @return a request Result
      */
-    @UnitOfWork
     public Result logout(Context context, Session session) {
-        String redirectUrl = reverseRouter.with(Auth0Controller::loggedOut).absolute(context).build();
 
         if (session.get(SESSION_ID_TOKEN) != null) {
             session.clear();
-            return Results.redirect(auth.logoutUrl(redirectUrl, true).useFederated(true).build());
+            return Results.redirect(auth.logoutUrl(getLoggedOutUrl(context), true).useFederated(true).build());
 
         } else {
             session.clear();
-            return Results.redirect(redirectUrl);
+            return Results.redirect(getLoggedOutUrl(context));
         }
 
     }
@@ -148,13 +173,18 @@ public class Auth0Controller {
      *            current Ninja's context
      * @return a request Result
      */
-    @UnitOfWork
     public Result loggedOut(Context context) {
+
         if (loggedOutPage != null) {
+
             return Results.redirect(loggedOutPage);
+
         } else {
+
             return Results.text().render("Logged Out");
+
         }
+
     }
 
     /**
@@ -168,10 +198,11 @@ public class Auth0Controller {
      *            a user id or email to simulate
      * @return a request Result
      */
-    @UnitOfWork
     public Result simulate(Context context, Session session, @PathParam("value") String value) {
+
         session.put(SESSION_ID_TOKEN, tokenHandler.buildSimulatedJWT(value, algorithm));
         return Results.text().render("Signed In");
+
     }
 
 }

@@ -1,7 +1,8 @@
-package net.zileo.ninja.auth0;
+package net.zileo.ninja.auth0.filters;
 
 import com.google.inject.Inject;
 
+import net.zileo.ninja.auth0.controllers.Auth0Controller;
 import ninja.Context;
 import ninja.Filter;
 import ninja.FilterChain;

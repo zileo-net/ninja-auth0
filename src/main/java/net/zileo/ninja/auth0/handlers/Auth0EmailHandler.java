@@ -1,8 +1,10 @@
-package net.zileo.ninja.auth0.subject;
+package net.zileo.ninja.auth0.handlers;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+
+import net.zileo.ninja.auth0.subject.Subject;
 
 /**
  * Same as {@link Auth0TokenHandler} but with a little shortcut allowing to generate a Subject based on a given verified email address.
@@ -32,8 +34,10 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
      *            a JSON Web Token
      * @return an email address
      */
-    public static String getEmail(DecodedJWT jwt) {
+    public String getEmail(DecodedJWT jwt) {
+
         return jwt.getClaim(CLAIM_EMAIL) != null ? jwt.getClaim(CLAIM_EMAIL).asString() : null;
+
     }
 
     /**
@@ -43,12 +47,14 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
      *            a JSON Web Token
      * @return true if already verified
      */
-    public static boolean isVerifiedEmail(DecodedJWT jwt) {
+    public boolean isVerifiedEmail(DecodedJWT jwt) {
+
         return jwt.getClaim(CLAIM_EMAIL_VERIFIED) != null && jwt.getClaim(CLAIM_EMAIL_VERIFIED).asBoolean();
+
     }
 
     /**
-     * @see net.zileo.ninja.auth0.subject.Auth0TokenHandler#buildSubjectFromJWT(com.auth0.jwt.interfaces.DecodedJWT, java.lang.String)
+     * @see net.zileo.ninja.auth0.handlers.Auth0TokenHandler#buildSubjectFromJWT(com.auth0.jwt.interfaces.DecodedJWT, java.lang.String)
      */
     @Override
     public P buildSubjectFromJWT(DecodedJWT jwt, String userId) {
@@ -58,6 +64,7 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
         }
 
         return buildSubjectFromEmail(jwt, userId, getEmail(jwt));
+
     }
 
     /**
@@ -84,7 +91,7 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
      */
     @Override
     public String buildSimulatedJWT(String value, Algorithm algorithm) {
-        return JWT.create().withClaim(CLAIM_EMAIL, value).withClaim(CLAIM_EMAIL_VERIFIED, Boolean.TRUE).withClaim(Auth0TokenHandler.CLAIM_SIMULATED, Boolean.TRUE).sign(algorithm);
+        return JWT.create().withClaim(CLAIM_SUBJECT, value).withClaim(CLAIM_EMAIL, value).withClaim(CLAIM_EMAIL_VERIFIED, Boolean.TRUE).withClaim(Auth0TokenHandler.CLAIM_SIMULATED, Boolean.TRUE).sign(algorithm);
     }
 
 }

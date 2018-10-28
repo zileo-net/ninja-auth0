@@ -39,6 +39,7 @@ import com.google.inject.Singleton;
 
 import net.zileo.ninja.auth0.subject.Auth0;
 import net.zileo.ninja.auth0.subject.Subject;
+import net.zileo.ninja.auth0.utils.Auth0Subject;
 
 /**
  * Dummy controller.
@@ -60,8 +61,12 @@ public class ExampleController {
         return Results.html();
     }
 
-    public Result helloSubject(@Auth0 Subject subject) {
+    public Result helloSubject(@Auth0 Auth0Subject subject) {
         return Results.html().render("Subject", subject).render("subjectClass", subject.getClass().getName());
+    }
+    
+    public Result helloSubjectWrongFilter(@Auth0 Auth0Subject subject) {
+        return Results.html().template("views/ExampleController/helloSubject.ftl.html").render("Subject", subject).render("subjectClass", subject.getClass().getName());
     }
 
     public Result helloPublicJson() {

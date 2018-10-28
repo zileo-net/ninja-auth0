@@ -1,8 +1,12 @@
-package net.zileo.ninja.auth0;
+package net.zileo.ninja.auth0.filters;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
-import net.zileo.ninja.auth0.subject.Auth0TokenHandler;
+import net.zileo.ninja.auth0.controllers.Auth0Controller;
+import net.zileo.ninja.auth0.handlers.Auth0TokenHandler;
 import net.zileo.ninja.auth0.subject.Subject;
 import ninja.Context;
 import ninja.Filter;
@@ -10,6 +14,7 @@ import ninja.FilterChain;
 import ninja.Result;
 import ninja.Results;
 import ninja.ReverseRouter;
+import ninja.exceptions.ForbiddenRequestException;
 
 /**
  * Filter allowing to check if the current user has been authenticated.
@@ -18,6 +23,8 @@ import ninja.ReverseRouter;
  */
 public class AuthenticateFilter implements Filter {
 
+    private final static Logger logger = LoggerFactory.getLogger(AuthenticateFilter.class);
+            
     public final static String SUBJECT_CTX_KEY = "contextSubject";
 
     @Inject
@@ -44,22 +51,28 @@ public class AuthenticateFilter implements Filter {
 
             } catch (IllegalArgumentException e) {
 
-                context.getFlashScope().error(e.getMessage());
+                logger.warn(e.getMessage());
+                throw new ForbiddenRequestException(e.getMessage(), e);
 
             }
-        }
 
-        // No Id Token or Subject = redirect to login page
-        context.getSession().put(Auth0Controller.SESSION_TARGET_URL, context.getRequestPath());
-        return Results.redirect(reverseRouter.with(Auth0Controller::login).build());
+        } else {
+
+            // No Id Token or Subject = redirect to login page
+            context.getSession().put(Auth0Controller.SESSION_TARGET_URL, context.getRequestPath());
+            return Results.redirect(reverseRouter.with(Auth0Controller::login).build());
+
+        }
 
     }
 
     /**
-     * Retrieves the authenticated subject stored in current Ninja's context. 
+     * Retrieves the authenticated subject stored in current Ninja's context.
      * 
-     * @param context current Ninja's context
-     * @param clazz Subject implementation class
+     * @param context
+     *            current Ninja's context
+     * @param clazz
+     *            Subject implementation class
      * @return current Subject
      */
     public static <T extends Subject> T get(Context context, Class<T> clazz) {

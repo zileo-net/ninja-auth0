@@ -1,10 +1,12 @@
-package net.zileo.ninja.auth0.subject;
+package net.zileo.ninja.auth0.handlers;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
-import net.zileo.ninja.auth0.Auth0Controller;
+import net.zileo.ninja.auth0.controllers.Auth0Controller;
+import net.zileo.ninja.auth0.subject.Auth0;
+import net.zileo.ninja.auth0.subject.Subject;
 import ninja.Context;
 
 /**
@@ -35,8 +37,10 @@ public abstract class Auth0TokenHandler<P extends Subject> {
      *            a JSON Web Token
      * @return a user id
      */
-    public static String getUserId(DecodedJWT jwt) {
+    public String getUserId(DecodedJWT jwt) {
+
         return jwt.getClaim(CLAIM_SUBJECT) != null ? jwt.getClaim(CLAIM_SUBJECT).asString() : null;
+
     }
 
     /**
@@ -49,7 +53,9 @@ public abstract class Auth0TokenHandler<P extends Subject> {
      * @return authenticated User
      */
     public final P buildSubject(Context context) throws IllegalArgumentException {
+
         return this.buildSubject(context.getSession().get(Auth0Controller.SESSION_ID_TOKEN));
+
     }
 
     /**
@@ -62,6 +68,7 @@ public abstract class Auth0TokenHandler<P extends Subject> {
      * @return authenticated User
      */
     public final P buildSubject(String idToken) throws IllegalArgumentException {
+
         if (idToken == null) {
             throw new IllegalArgumentException("No Id Token provided");
         }
@@ -80,7 +87,9 @@ public abstract class Auth0TokenHandler<P extends Subject> {
         if (subject == null) {
             throw new IllegalArgumentException("Unable to create Subject from provided Id Token");
         }
+
         return subject;
+
     }
 
     /**
@@ -104,7 +113,9 @@ public abstract class Auth0TokenHandler<P extends Subject> {
      * @return a JWT
      */
     public String buildSimulatedJWT(String value, Algorithm algorithm) {
+
         return JWT.create().withClaim(Auth0TokenHandler.CLAIM_SUBJECT, value).withClaim(Auth0TokenHandler.CLAIM_SIMULATED, Boolean.TRUE).sign(algorithm);
+
     }
 
 }

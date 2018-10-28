@@ -2,7 +2,8 @@ package net.zileo.ninja.auth0.subject;
 
 import com.google.inject.Inject;
 
-import net.zileo.ninja.auth0.AuthenticateFilter;
+import net.zileo.ninja.auth0.filters.AuthenticateFilter;
+import net.zileo.ninja.auth0.handlers.Auth0TokenHandler;
 import ninja.Context;
 import ninja.params.ArgumentExtractor;
 
