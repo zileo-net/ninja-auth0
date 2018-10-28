@@ -30,6 +30,7 @@ First, copy this dependency into your `pom.xml` file.
 
 Then instantiates the modules routes by calling adding this line to your `conf/Routes.java` file :
 
+```java
     @Inject
     private Auth0Routes auth0Routes;
     
@@ -39,10 +40,13 @@ Then instantiates the modules routes by calling adding this line to your `conf/R
         auth0Routes.init(router);
         ...
     }
+```
 
 Add our `AuthenticateFilter` on methods or controllers you want to protect, via annotation or route definition. For example :
 
+```java
     router.GET().route("/helloPrivate").filters(AuthenticateFilter.class).with(ExampleController::helloPrivate);
+```
 
 Finally, configure your Auth0 application settings inside Ninja's `application.conf` :
 
@@ -54,17 +58,19 @@ Finally, configure your Auth0 application settings inside Ninja's `application.c
 
 Your routes are now protected. But you still have to bridge Auth0 authentication process with a user representative class. We provide a default way of working, with a simple `Auth0Subject` class containing some information about the authenticated user. To use it, simply configure Guice in your `conf/Module.java` to use the corresponding token handler :
 
+```java
     protected void configure() {
 
         bind(new TypeLiteral<Auth0TokenHandler<? extends Subject>>() {}).to(Auth0SubjectTokenHandler.class);
 
     }
+```
 
 Now you'll be able to received a `Auth0Subject` instance in a controller's method by adding `@Auth0 Auth0Subject subject` as a parameter.
 
 ---
 
-## Way of working details
+## Implementation details
 
 Ninja Auth0 will combine with Auth0 authentication SaaS to provide your application a quick authentication management. It will get back a JSON Web Token from Auth0 and store it inside Ninja's cookie session. For each request, the presence of one JWT will be checked and according to your requirements a User or Subject will be popuated in your `Context`.
 
@@ -89,6 +95,7 @@ Once the user authenticates itself, Auth0 will call back this module in your app
 
 Depending on your needs, you'll want to have authenticated users be related to some model class in your application. Two steps are needed for this. First, make your user representative class implements our `Subject` interface. It doesn't require any method to implement, but it will allows Guice injection to work with the second needed step (see below). Here is a an example of what could be your user entity class :
 
+```java
     package models;
     
     import java.util.Date;
@@ -119,9 +126,11 @@ Depending on your needs, you'll want to have authenticated users be related to s
         public String auth0Id;
     
     } 
+```
 
 Then, you'll need to provide your own an implementation of a `Auth0TokenHandler`, a class that will create your own `User` according to the Auth0 JSON Web Toolkit. If you only want to base your authentication model on the verified e-mail address of your users, you can also extend our `Auth0EmailHandler`, that provides a quick abstract e-mail based method. Here is a simplified example, based on previous entity class :
     
+```java
     import javax.persistence.EntityManager;
     import javax.persistence.NoResultException;
     
@@ -160,16 +169,19 @@ Then, you'll need to provide your own an implementation of a `Auth0TokenHandler`
         }
     
     }
-    
+```
+
 Important note : this example allows user registration, as it will create a user in your database. According to this, note the `@Transactional` annotation used.
 
 Last thing to do, configure Guice in your `conf/Module.java` to recognized your token handler :
 
+```java
     protected void configure() {
 
         bind(new TypeLiteral<Auth0TokenHandler<? extends Subject>>() {}).to(UserAuth0TokenHandler.class);
 
     }
+```
 
 Now you'll be able to received a `User` instance in a controller's method by adding `@Auth0 User user` as a parameter. You can also retrieve this instance by calling `AuthenticateFilter.get(context, User.class);` ; useful if you want to access it in an other filter (for permissions check for example).
 
