@@ -22,11 +22,13 @@ And... That's all. The default configuration will be enough to test the module, 
 
 First, copy this dependency into your `pom.xml` file.
 
+```xml
     <dependency>
         <groupId>net.zileo</groupId>
         <artifactId>ninja-auth0</artifactId>
         <version>1.0.0</version>
     </dependency>
+```
 
 Then instantiates the modules routes by calling adding this line to your `conf/Routes.java` file :
 
@@ -50,9 +52,11 @@ Add our `AuthenticateFilter` on methods or controllers you want to protect, via 
 
 Finally, configure your Auth0 application settings inside Ninja's `application.conf` :
 
+```ini
     auth0.domain = your.domain.auth0.com
     auth0.clientId = yourAuth0ClientId
     auth0.clientSecret = yourAuth0Client-Secret
+```
 
 ### JAVA subject injection
 
@@ -185,6 +189,14 @@ Last thing to do, configure Guice in your `conf/Module.java` to recognized your 
 
 Now you'll be able to received a `User` instance in a controller's method by adding `@Auth0 User user` as a parameter. You can also retrieve this instance by calling `AuthenticateFilter.get(context, User.class);` ; useful if you want to access it in an other filter (for permissions check for example).
 
+### Auth0 user profiles
+
+It's not recommended to keep large user profiles inside your Auth0 users meta data. But if you need some, check [this page](https://auth0.com/docs/api-auth/tutorials/adoption/scope-custom-claims) to create a rule that will populate your JWT claims with your own meta data. You'll then be able to get your claims in your token handler implementation by calling :
+
+```java
+    jwt.getClaim("https://your.domain/your_claim").asString()
+```
+
 ### Filters & Global filters
 
 To protect your routes, this module provides two filters : 
@@ -195,8 +207,9 @@ To protect your routes, this module provides two filters :
 
 You can also configure these settings inside Ninja's `application.conf` :
 
+```ini
     auth0.loggedOut = Path to redirect to once logged out
-
+```
 
 ---
 
