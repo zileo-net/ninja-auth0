@@ -207,9 +207,11 @@ Last thing to do, configure Guice in your `conf/Module.java` to recognized your 
     }
 ```
 
-Now you'll be able to receive a `User` instance in a controller's method by adding `@Auth0 User user` as a parameter. You can also retrieve this instance by calling `AuthenticateFilter.get(context, User.class);` ; useful if you want to access it in an other filter (for permissions check for example).
+Now you'll be able to receive a `User` instance in a controller's method by adding `@Auth0 User user` as a parameter. You can also retrieve this instance by calling `AuthenticateFilter.get(context, User.class);` ; useful if you want to access it in an other filter (for permissions check for example). 
 
-Note that if you need to obtain Auth0 user meta data inside your token handler, and you have configure a Auth0 rule to populate your JWT with it, just proceed like this :
+In this scenario, you'll even be able to simulate a user by calling a `/auth0/simulate/X` route, where X is the user id or the email of your user (depending on what you used as a token handler). This route is only registered in dev and test mode, not in production mode.
+
+If you still need to obtain Auth0 user meta data inside your token handler, and you have configure a Auth0 rule to populate your JWT with it, just proceed like this :
 
 ```java
     jwt.getClaim("https://your.domain/your_claim").asString()
@@ -221,6 +223,11 @@ To protect your routes, this module provides two filters :
 * `AuthenticateFilter` : Will check if user is authenticated and then use a token handler to populate Ninja's context.
 * `CheckAuthenticatedFilter` : Will only check if your user is authenticated. Useful if your token handler use for example a database connection but you don't need a Subject instance.
 
+By default, global filters defined in your application are not applied to Ninja Auth0 routes. This ways you can for example use `CheckAuthenticatedFilter` as a global one. To apply filters to Ninja Auth0 routes, simply pass them to the `Auth0Routes` init method.
+
+```java
+    auth0Routes.init(router, MyFirstFilter.class, MySecondFilter.class);
+```
 
 ---
 

@@ -108,8 +108,10 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
     @Test
     public void testSimulate() {
         goTo(getBaseUrl() + "/auth0/simulate/" + AUTH0_SIMULATED);
-        assertTrue(pageSource().contains("Signed In"));
 
+        await().atMost(10, TimeUnit.SECONDS).until(el(".zileo")).present();
+        assertTrue("Should have not been redirected to " + url(), url().isEmpty());
+        
         checkPrivateAccess(AUTH0_SIMULATED, "none");
         logout();
     }

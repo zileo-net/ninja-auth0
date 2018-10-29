@@ -8,6 +8,7 @@ import com.auth0.client.auth.AuthAPI;
 import com.auth0.exception.Auth0Exception;
 import com.auth0.json.auth.TokenHolder;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
 import net.zileo.ninja.auth0.handlers.Auth0TokenHandler;
@@ -69,7 +70,7 @@ public class Auth0Controller {
         return reverseRouter.with(Auth0Controller::callback).absolute(context).build();
 
     }
-    
+
     /**
      * Get configured Auth0 logged out route.
      * 
@@ -188,7 +189,7 @@ public class Auth0Controller {
     }
 
     /**
-     * Simulates a user authentication without calling Auth0.
+     * Simulates a user authentication without calling Auth0. Only available in dev or test mode.
      * 
      * @param context
      *            current Ninja's context
@@ -200,8 +201,10 @@ public class Auth0Controller {
      */
     public Result simulate(Context context, Session session, @PathParam("value") String value) {
 
-        session.put(SESSION_ID_TOKEN, tokenHandler.buildSimulatedJWT(value, algorithm));
-        return Results.text().render("Signed In");
+        session.put(SESSION_ID_TOKEN, tokenHandler.buildSimulatedJWT(value, Maps.newHashMap()).sign(algorithm));
+
+        String targetUrl = session.remove(SESSION_TARGET_URL);
+        return Results.redirect(targetUrl == null ? "/" : targetUrl);
 
     }
 

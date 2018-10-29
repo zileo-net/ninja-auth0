@@ -1,7 +1,8 @@
 package net.zileo.ninja.auth0.handlers;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
+import java.util.Map;
+
+import com.auth0.jwt.JWTCreator.Builder;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import net.zileo.ninja.auth0.subject.Subject;
@@ -85,13 +86,13 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
      * 
      * @param value
      *            a user id or email (depending on client choice)
-     * @param algorithm
-     *            algorithm to sign the JSON Web Token
+     * @param additionalClaims
+     *            additional claims of the simulated user
      * @return a JWT
      */
     @Override
-    public String buildSimulatedJWT(String value, Algorithm algorithm) {
-        return JWT.create().withClaim(CLAIM_SUBJECT, value).withClaim(CLAIM_EMAIL, value).withClaim(CLAIM_EMAIL_VERIFIED, Boolean.TRUE).withClaim(Auth0TokenHandler.CLAIM_SIMULATED, Boolean.TRUE).sign(algorithm);
+    public Builder buildSimulatedJWT(String value, Map<String, String> additionalClaims) {
+        return super.buildSimulatedJWT(value, additionalClaims).withClaim(CLAIM_EMAIL, value).withClaim(CLAIM_EMAIL_VERIFIED, Boolean.TRUE);
     }
 
 }

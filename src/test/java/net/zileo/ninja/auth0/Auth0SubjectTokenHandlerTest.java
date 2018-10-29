@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.google.common.collect.Maps;
 
 import net.zileo.ninja.auth0.utils.Auth0Subject;
 import net.zileo.ninja.auth0.utils.Auth0SubjectTokenHandler;
@@ -37,7 +38,7 @@ public class Auth0SubjectTokenHandlerTest {
 
     @Test
     public void testGenerateToken() {
-        String idToken = handler.buildSimulatedJWT(USER_EMAIL, algorithm);
+        String idToken = handler.buildSimulatedJWT(USER_EMAIL, Maps.newHashMap()).sign(algorithm);
         assertNotNull(idToken);
         logger.info("JWT = {}", idToken);
 

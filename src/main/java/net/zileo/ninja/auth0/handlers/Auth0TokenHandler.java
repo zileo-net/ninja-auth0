@@ -1,7 +1,9 @@
 package net.zileo.ninja.auth0.handlers;
 
+import java.util.Map;
+
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.JWTCreator.Builder;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import net.zileo.ninja.auth0.controllers.Auth0Controller;
@@ -83,7 +85,7 @@ public abstract class Auth0TokenHandler<P extends Subject> {
             throw new IllegalArgumentException("No User Id in provided Id Token");
         }
 
-        P subject = buildSubjectFromJWT(jwt, getUserId(jwt));
+        P subject = buildSubjectFromJWT(jwt, userId);
         if (subject == null) {
             throw new IllegalArgumentException("Unable to create Subject from provided Id Token");
         }
@@ -108,13 +110,19 @@ public abstract class Auth0TokenHandler<P extends Subject> {
      * 
      * @param value
      *            a user id or email (depending on client choice)
-     * @param algorithm
-     *            algorithm to sign the JSON Web Token
+     * @param additionalClaims
+     *            additional claims of the simulated user
      * @return a JWT
      */
-    public String buildSimulatedJWT(String value, Algorithm algorithm) {
+    public Builder buildSimulatedJWT(String value, Map<String, String> additionalClaims) {
 
-        return JWT.create().withClaim(Auth0TokenHandler.CLAIM_SUBJECT, value).withClaim(Auth0TokenHandler.CLAIM_SIMULATED, Boolean.TRUE).sign(algorithm);
+        Builder builder = JWT.create().withClaim(Auth0TokenHandler.CLAIM_SUBJECT, value).withClaim(Auth0TokenHandler.CLAIM_SIMULATED, Boolean.TRUE);
+
+        for (Map.Entry<String, String> entry : additionalClaims.entrySet()) {
+            builder.withClaim(entry.getKey(), entry.getValue());
+        }
+
+        return builder;
 
     }
 

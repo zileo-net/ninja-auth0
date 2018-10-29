@@ -1,6 +1,5 @@
 package net.zileo.ninja.auth0.utils;
 
-import java.util.Date;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -20,12 +19,9 @@ public class Auth0Subject implements Subject {
 
     private final String email;
 
-    private final Date createdAt;
-
     public Auth0Subject(String id, String email) {
         this.id = id;
         this.email = email;
-        this.createdAt = new Date();
     }
 
     public String getId() {
@@ -34,10 +30,6 @@ public class Auth0Subject implements Subject {
 
     public String getEmail() {
         return email;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
     }
 
     public void put(String claim, Object value) {
