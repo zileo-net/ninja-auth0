@@ -91,6 +91,8 @@ When a user tries to reach one of your protected routes :
 
 Once the user authenticates itself, Auth0 will call back this module in your application providing a JSON Web Token. The module tries to decode that Token and creates a corresponding Subject. `Subject` is an interface that should represents your user data ; it can be a plain Java object if Auth0's JWT provides you enough information, or more commonly it can be a DTO enriched by data from your database. If a Subject have been successfully created, then the JWT is stored as a cookie session (see [Ninja's basic concepts](http://www.ninjaframework.org/documentation/basic_concepts/sessions.html)). **Note that this cookie's expiry time is set to the JWT expiry time, which means you can (must) control your session's life time only via your Auth0's configuration.**
 
+Note that when a user register with a login and a password, Auth0 sends an email with a verification link. While a user email address has not yet been verified, the default behavior of the module will be to display a 403 error page with a corresponding message.
+
 ---
 
 ## Advanced usage
