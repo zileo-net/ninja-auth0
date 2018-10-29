@@ -5,7 +5,7 @@
     <artifactId>ninja-auth0</artifactId>
     <packaging>jar</packaging>
     <groupId>net.zileo</groupId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Library for integrating Auth0 authentication service to your Ninja Framework project.</description>
@@ -35,7 +35,7 @@
         <connection>scm:git:https://github.com/zileo-net/ninja-auth0.git</connection>
         <developerConnection>scm:git:git@github.com:zileo-net/ninja-auth0.git</developerConnection>
         <url>https://github.com/zileo-net/ninja-auth0</url>
-        <tag>HEAD</tag>
+        <tag>ninja-auth0-1.0.0</tag>
     </scm>
 
     <build>
