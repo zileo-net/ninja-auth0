@@ -5,7 +5,7 @@
     <artifactId>ninja-auth0</artifactId>
     <packaging>jar</packaging>
     <groupId>net.zileo</groupId>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Library for integrating Auth0 authentication service to your Ninja Framework project.</description>
