@@ -8,3 +8,4 @@ bin
 .metadata
 .idea
 *~
+src/test/resources/conf/application.conf
