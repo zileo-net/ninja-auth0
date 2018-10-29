@@ -6,7 +6,7 @@
 
     <artifactId>ninja-auth0</artifactId>
     <packaging>jar</packaging>
-    <groupId>net.zileo.ninja</groupId>
+    <groupId>net.zileo</groupId>
     <version>0.0.1-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
