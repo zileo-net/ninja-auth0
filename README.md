@@ -95,9 +95,29 @@ Once the user authenticates itself, Auth0 will call back this module in your app
 
 ## Advanced usage
 
+### More configuration
+
+You can also configure these settings inside Ninja's `application.conf` :
+
+```ini
+    auth0.loggedOut = Path to redirect to once logged out
+    auth0.claimsNamespace = Namespace to retrieve your user's meta data from Auth0 (see next chapter)
+```
+
+### Auth0 user profiles
+
+It's not recommended to keep large user profiles inside your Auth0 users meta data. But if you need some properties, check [this page](https://auth0.com/docs/api-auth/tutorials/adoption/scope-custom-claims) to create a rule that will populate your JWT claims with your own meta data. Then configure the `auth0.claimsNamespace` property according to the namespace you have set up in that rule. The `Auth0SubjectTokenHandler` will recognize your own meta data and populate a map inside each `Auth0Subject`. You'll be able to retrieve those values by using one of these methods :
+
+```java
+    subject.is("boolean-property");
+    subject.get("string-property");
+```
+
+Note that it doesn't actually manage nested maps. The goal is to provide a quick access only to some properties you'll have to manage via Auth0.
+
 ### In-app user profiles
 
-Depending on your needs, you'll want to have authenticated users be related to some model class in your application. Two steps are needed for this. First, make your user representative class implements our `Subject` interface. It doesn't require any method to implement, but it will allows Guice injection to work with the second needed step (see below). Here is a an example of what could be your user entity class :
+Depending on your needs, you'll want to have authenticated users be related to some model class in your application rather than our `Auth0Subject`. Two steps are needed for this. First, make your user representative class implements our `Subject` interface. It doesn't require any method to implement, but it will allows Guice injection to work with the second needed step (see below). Here is a an example of what could be your user entity class :
 
 ```java
     package models;
@@ -175,7 +195,7 @@ Then, you'll need to provide your own an implementation of a `Auth0TokenHandler`
     }
 ```
 
-Important note : this example allows user registration, as it will create a user in your database. According to this, note the `@Transactional` annotation used.
+Important note : this example allows user registration, as it will create a user in your database. According to this, note the `@Transactional` annotation used. Don't use `@UnitOfWork` for the moment as there is actually a Guice persistence related bug ; not allowing such nested annotations.
 
 Last thing to do, configure Guice in your `conf/Module.java` to recognized your token handler :
 
@@ -187,11 +207,9 @@ Last thing to do, configure Guice in your `conf/Module.java` to recognized your 
     }
 ```
 
-Now you'll be able to received a `User` instance in a controller's method by adding `@Auth0 User user` as a parameter. You can also retrieve this instance by calling `AuthenticateFilter.get(context, User.class);` ; useful if you want to access it in an other filter (for permissions check for example).
+Now you'll be able to receive a `User` instance in a controller's method by adding `@Auth0 User user` as a parameter. You can also retrieve this instance by calling `AuthenticateFilter.get(context, User.class);` ; useful if you want to access it in an other filter (for permissions check for example).
 
-### Auth0 user profiles
-
-It's not recommended to keep large user profiles inside your Auth0 users meta data. But if you need some, check [this page](https://auth0.com/docs/api-auth/tutorials/adoption/scope-custom-claims) to create a rule that will populate your JWT claims with your own meta data. You'll then be able to get your claims in your token handler implementation by calling :
+Note that if you need to obtain Auth0 user meta data inside your token handler, and you have configure a Auth0 rule to populate your JWT with it, just proceed like this :
 
 ```java
     jwt.getClaim("https://your.domain/your_claim").asString()
@@ -203,13 +221,6 @@ To protect your routes, this module provides two filters :
 * `AuthenticateFilter` : Will check if user is authenticated and then use a token handler to populate Ninja's context.
 * `CheckAuthenticatedFilter` : Will only check if your user is authenticated. Useful if your token handler use for example a database connection but you don't need a Subject instance.
 
-### More configuration
-
-You can also configure these settings inside Ninja's `application.conf` :
-
-```ini
-    auth0.loggedOut = Path to redirect to once logged out
-```
 
 ---
 

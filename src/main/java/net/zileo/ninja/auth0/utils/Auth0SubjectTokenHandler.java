@@ -1,7 +1,6 @@
 package net.zileo.ninja.auth0.utils;
 
 import javax.inject.Named;
-import javax.sound.sampled.BooleanControl;
 
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -32,6 +31,7 @@ public class Auth0SubjectTokenHandler extends Auth0EmailHandler<Auth0Subject> {
 
             if (key.startsWith(claimsNamespace)) {
                 Claim claim = jwt.getClaim(key);
+
                 if (claim.asBoolean() != null) {
                     subject.put(key.substring(claimsNamespace.length()), claim.asBoolean());
                 } else if (claim.asLong() != null) {

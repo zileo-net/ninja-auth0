@@ -84,7 +84,7 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
         await().atMost(10, TimeUnit.SECONDS).until(el(".zileo")).present();
         assertTrue("Should have not been redirected to " + url(), url().contains("helloPrivate"));
         
-        checkPrivateAccess(AUTH0_USER, "myValue2");
+        checkPrivateAccess(AUTH0_USER, "my_value1");
         logout();
     }
 
@@ -110,7 +110,7 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
         goTo(getBaseUrl() + "/auth0/simulate/" + AUTH0_SIMULATED);
         assertTrue(pageSource().contains("Signed In"));
 
-        checkPrivateAccess(AUTH0_SIMULATED, "");
+        checkPrivateAccess(AUTH0_SIMULATED, "none");
         logout();
     }
 
@@ -126,7 +126,7 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
         await().atMost(10, TimeUnit.SECONDS).until(el(".zileo")).present();
         assertTrue("Should have not been redirected to " + url(), url().contains("helloPrivate"));
 
-        checkPrivateAccess(AUTH0_ADMIN, "myValue1");
+        checkPrivateAccess(AUTH0_ADMIN, "my_value2");
         logout();
     }
 
@@ -162,16 +162,16 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
         assertTrue(window().title().contains("Test"));
         assertEquals("Hello " + user + "!", el("h1").text());
         assertEquals(Auth0Subject.class.getName(), el("h2").text());
-        assertTrue($("p").get(0).textContent().contains(AUTH0_ADMIN.equals(user) ? "true" : "false"));
-        assertTrue($("p").get(1).textContent().contains(myClaim));
+        assertTrue($("p").get(0).textContent(), $("p").get(0).textContent().contains(AUTH0_ADMIN.equals(user) ? "true" : "false"));
+        assertTrue($("p").get(1).textContent(), $("p").get(1).textContent().contains(myClaim));
         
         goTo(getBaseUrl() + "/helloSubject2");
         assertTrue("Should have not been redirected to " + url(), url().contains("helloSubject2"));
         assertTrue(window().title().contains("Test"));
         assertEquals("Hello " + user + "!", el("h1").text());
         assertEquals(Auth0Subject.class.getName(), el("h2").text());
-        assertTrue($("p").get(0).textContent().contains(AUTH0_ADMIN.equals(user) ? "true" : "false"));
-        assertTrue($("p").get(1).textContent().contains(myClaim));
+        assertTrue($("p").get(0).textContent(), $("p").get(0).textContent().contains(AUTH0_ADMIN.equals(user) ? "true" : "false"));
+        assertTrue($("p").get(1).textContent(), $("p").get(1).textContent().contains(myClaim));
         
         goTo(getBaseUrl() + "/helloSubject.json");
         assertTrue("Should have not been redirected to " + url(), url().contains("helloSubject.json"));
