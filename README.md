@@ -1,6 +1,6 @@
 # Ninja Auth0 module
 
-This library provides an integration strategy for [Auth0](https://auth0.com) authentication inside Ninja Framework project.
+This library provides a quick integration strategy for [Auth0](https://auth0.com) authentication inside a [Ninja Framework](http://www.ninjaframework.org) web application.
 
 This module refer to the [Auth0 WebApp Single Sign On guide](https://auth0.com/docs/architecture-scenarios/web-app-sso), please read it to understand what it can do for your application. Then follow this README to quickly have an authentication system working. Note that all our classes mentioned here resides in sub-packages of `net.zileo.ninja.auth0`.
 
