@@ -56,6 +56,7 @@ Finally, configure your Auth0 application settings inside Ninja's `application.c
     auth0.domain = your.domain.auth0.com
     auth0.clientId = yourAuth0ClientId
     auth0.clientSecret = yourAuth0Client-Secret
+    auth0.loggedOut = /
 ```
 
 ### JAVA subject injection
