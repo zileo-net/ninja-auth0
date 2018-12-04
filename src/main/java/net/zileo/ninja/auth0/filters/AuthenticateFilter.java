@@ -15,6 +15,7 @@ import ninja.Result;
 import ninja.Results;
 import ninja.ReverseRouter;
 import ninja.exceptions.ForbiddenRequestException;
+import ninja.utils.NinjaProperties;
 
 /**
  * Filter allowing to check if the current user has been authenticated.
@@ -24,17 +25,21 @@ import ninja.exceptions.ForbiddenRequestException;
 public class AuthenticateFilter implements Filter {
 
     private final static Logger logger = LoggerFactory.getLogger(AuthenticateFilter.class);
-            
+
     public final static String SUBJECT_CTX_KEY = "contextSubject";
 
     @Inject
     private ReverseRouter reverseRouter;
 
     @Inject
+    private NinjaProperties ninjaProperties;
+
+    @Inject
     private Auth0TokenHandler<? extends Subject> tokenHandler;
 
     /**
-     * If there is no JSON ID Token in current session, then the current requested path is saved and the response redirects to the Auth0 controller login route.
+     * If there is no JSON ID Token in current session, then the current requested path is saved and the response
+     * redirects to the Auth0 controller login route.
      * 
      * @see ninja.Filter#filter(ninja.FilterChain, ninja.Context)
      */
@@ -60,7 +65,11 @@ public class AuthenticateFilter implements Filter {
 
             // No Id Token or Subject = redirect to login page
             context.getSession().put(Auth0Controller.SESSION_TARGET_URL, context.getRequestPath());
-            return Results.redirect(reverseRouter.with(Auth0Controller::login).build());
+            if (ninjaProperties.isProd()) {
+                return Results.redirect(reverseRouter.with(Auth0Controller::login).build());
+            } else {
+                return Results.redirect(reverseRouter.with(Auth0Controller::simulateLogin).build());
+            }
 
         }
 

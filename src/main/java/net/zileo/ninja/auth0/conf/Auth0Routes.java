@@ -27,7 +27,9 @@ public class Auth0Routes {
         router.GET().route("/auth0/out").globalFilters().filters(filters).with(Auth0Controller::loggedOut);
 
         if (!ninjaProperties.isProd()) {
+            router.GET().route("/auth0/simulate").globalFilters().filters(filters).with(Auth0Controller::simulateLogin);
             router.GET().route("/auth0/simulate/{value}").globalFilters().filters(filters).with(Auth0Controller::simulate);
+            router.POST().route("/auth0/doSimulate").globalFilters().filters(filters).with(Auth0Controller::doSimulate);
         }
 
     }

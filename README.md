@@ -85,6 +85,8 @@ Ninja Auth0 module creates the following routes :
 * `/auth0/logout` : triggers a Auth0 log out request
 * `/auth0/out` : default end route after logging out
 * `/auth0/simulate/{value}` : only in test or dev, allows you to bypass the Auth0 login procedure.
+* `/auth0/simulate` : only in test or dev, allows you to bypass the Auth0 login procedure by displaying a simulation form.
+* `/auth0/doSimulate` : only in test or dev, allows you to bypass the Auth0 login procedure (POST version of /auth0/simulate/x).
 
 When a user tries to reach one of your protected routes :
 * Either the session contains a JWT, and then it's decoded (see below)
@@ -231,6 +233,13 @@ By default, global filters defined in your application are not applied to Ninja 
 ```java
     auth0Routes.init(router, MyFirstFilter.class, MySecondFilter.class);
 ```
+
+---
+
+## Changelog
+
+* v1.0.0 Initial version
+* v1.1.0 Auto display simulation form for dev and test modes
 
 ---
 

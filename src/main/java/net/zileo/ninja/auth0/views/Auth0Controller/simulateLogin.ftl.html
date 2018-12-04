@@ -1,0 +1,65 @@
+<html>
+<head>
+    <title>Auth0 Bypass</title>
+    <style type="text/css">
+    body {
+      background-color: #E0E0E0;
+      font-family: Calibri, Tahoma, sans;
+    }
+    .center-div {
+      position: absolute;
+      margin: auto;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 300px;
+      height: 170px;
+      padding: 20px;
+      border: 1px solid #A0A0A0;
+      border-radius: 10px;
+      background-color: white;
+      text-align: center;
+    }
+    hr {
+        border: 0;
+        height: 0;
+        border-top: 1px solid #A0A0A0;
+    }
+    a {
+        color: white;
+        text-decoration: none;
+    }
+    input {
+        padding: 5px;
+        border: 1px solid #aeaeae;
+        border-radius: 5px;
+        width: 90%;
+        box-shadow: 1px 1px 2px #C0C0C0 inset;
+        font-size: .9em;
+    }
+    button {
+        padding: 5px;
+        border: 1px solid #aeaeae;
+        border-radius: 5px;
+        width: 90%;
+        box-shadow: 1px 1px 2px #C0C0C0;
+        font-size: 1em;
+    }
+    h1 {
+        margin: 0 0 6px;
+    }
+    </style>
+</head>
+<body>
+    <div class="center-div">
+        <form action="/auth0/doSimulate" method="POST">
+            <h1>Ninja Auth0</h1>
+            <input type="text" name="value" placeholder="login" /><br />
+            <button type="submit">Simulate</button>
+            <hr />
+            <button type="button" onClick="location.href='/auth0/login';">Trigger Auth0</button>
+        </form>
+    </div>
+</body>
+</html>

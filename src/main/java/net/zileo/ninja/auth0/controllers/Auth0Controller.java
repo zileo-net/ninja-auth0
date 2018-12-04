@@ -19,6 +19,7 @@ import ninja.Results;
 import ninja.ReverseRouter;
 import ninja.exceptions.ForbiddenRequestException;
 import ninja.exceptions.InternalServerErrorException;
+import ninja.params.Param;
 import ninja.params.PathParam;
 import ninja.session.Session;
 
@@ -208,4 +209,31 @@ public class Auth0Controller {
 
     }
 
+    /**
+     * Simulates a user authentication without calling Auth0. Only available in dev or test mode.
+     * 
+     * @return a request Result
+     */
+    public Result simulateLogin() {
+
+        return Results.html();
+
+    }
+
+    /**
+     * Simulates a user authentication without calling Auth0. Only available in dev or test mode.
+     * 
+     * @param context
+     *            current Ninja's context
+     * @param session
+     *            current Ninja's session
+     * @param value
+     *            a user id or email to simulate
+     * @return a request Result
+     */
+    public Result doSimulate(Context context, Session session, @Param("value") String value) {
+
+        return simulate(context, session, value);
+
+    }
 }
