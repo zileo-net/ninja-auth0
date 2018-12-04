@@ -26,7 +26,7 @@ First, copy this dependency into your `pom.xml` file.
     <dependency>
         <groupId>net.zileo</groupId>
         <artifactId>ninja-auth0</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </dependency>
 ```
 
