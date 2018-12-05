@@ -25,6 +25,7 @@ import ninja.exceptions.InternalServerErrorException;
 import ninja.params.Param;
 import ninja.params.PathParam;
 import ninja.session.Session;
+import ninja.utils.NinjaProperties;
 
 /**
  * Ninja's controller offering routes that can handle Auth0 login and logout.
@@ -32,7 +33,7 @@ import ninja.session.Session;
  * @author jlannoy
  */
 public class Auth0Controller {
-    
+
     private final static Logger logger = LoggerFactory.getLogger(Auth0Controller.class);
 
     public static final String SESSION_ID_TOKEN = "id_token";
@@ -42,8 +43,8 @@ public class Auth0Controller {
     @Inject
     protected ReverseRouter reverseRouter;
 
-    @Inject(optional = true)
-    @Named("auth0.loggedOut")
+    private boolean forceHttps;
+
     private String loggedOutPage;
 
     @Inject
@@ -54,13 +55,17 @@ public class Auth0Controller {
     private Algorithm algorithm;
 
     @Inject
-    public void init(@Named("auth0.domain") String domain,
+    public void init(NinjaProperties properties,
+                     @Named("auth0.domain") String domain,
                      @Named("auth0.clientId") String clientId,
                      @Named("auth0.clientSecret") String clientSecret)
             throws IllegalArgumentException, UnsupportedEncodingException {
 
         this.auth = new AuthAPI(domain, clientId, clientSecret);
         this.algorithm = Algorithm.HMAC256(clientSecret);
+
+        this.loggedOutPage = properties.getWithDefault("auth0.loggedOut", "/");
+        this.forceHttps = properties.getBooleanWithDefault("auth0.forceHttps", false);
 
     }
 
@@ -73,7 +78,8 @@ public class Auth0Controller {
      */
     protected String getCallbackUrl(Context context) {
 
-        return reverseRouter.with(Auth0Controller::callback).absolute(context).build();
+        return reverseRouter.with(Auth0Controller::callback)
+                .absolute(forceHttps ? "https" : context.getScheme(), context.getHostname()).build();
 
     }
 
@@ -86,7 +92,8 @@ public class Auth0Controller {
      */
     protected String getLoggedOutUrl(Context context) {
 
-        return reverseRouter.with(Auth0Controller::loggedOut).absolute(context).build();
+        return reverseRouter.with(Auth0Controller::loggedOut)
+                .absolute(forceHttps ? "https" : context.getScheme(), context.getHostname()).build();
 
     }
 

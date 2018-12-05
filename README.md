@@ -56,7 +56,6 @@ Finally, configure your Auth0 application settings inside Ninja's `application.c
     auth0.domain = your.domain.auth0.com
     auth0.clientId = yourAuth0ClientId
     auth0.clientSecret = yourAuth0Client-Secret
-    auth0.loggedOut = /
 ```
 
 ### JAVA subject injection
@@ -105,7 +104,8 @@ Note that when a user register with a login and a password, Auth0 sends an email
 You can also configure these settings inside Ninja's `application.conf` :
 
 ```ini
-    auth0.loggedOut = Path to redirect to once logged out
+    auth0.loggedOut = Path to redirect to once logged out (default is /)
+    auth0.forceHttps = If true, will force https in callback URLs ; else grab scheme from context
     auth0.claimsNamespace = Namespace to retrieve your user's meta data from Auth0 (see next chapter)
 ```
 
@@ -240,6 +240,7 @@ By default, global filters defined in your application are not applied to Ninja 
 
 * v1.0.0 Initial version
 * v1.1.0 Auto display simulation form for dev and test modes
+* v1.1.2 Configuration property allowing to force HTTPs
 
 ---
 
