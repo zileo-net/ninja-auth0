@@ -76,8 +76,11 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
     public void testPrivatePages() {
         goTo(getBaseUrl() + "/helloPrivate");
 
+        // Should have been redirected to Simulation login page
+        assertTrue(window().title().contains("Ninja Auth0"));
+        $("#auth0_button").click();
         // Should have been redirected to Auth0 login page
-        assertFalse(window().title().contains("Test"));
+        await().atMost(10, TimeUnit.SECONDS).until(el(".auth0-lock-widget")).present();
         assertTrue(window().title().contains("Sign In with Auth0"));
         login(AUTH0_USER);
 
@@ -92,8 +95,11 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
     public void testNotVerified() {
         goTo(getBaseUrl() + "/helloPrivate");
 
+        // Should have been redirected to Simulation login page
+        assertTrue(window().title().contains("Ninja Auth0"));
+        $("#auth0_button").click();
         // Should have been redirected to Auth0 login page
-        assertFalse(window().title().contains("Test"));
+        await().atMost(10, TimeUnit.SECONDS).until(el(".auth0-lock-widget")).present();
         assertTrue(window().title().contains("Sign In with Auth0"));
         login(AUTH0_NOT_VERIFIED);
 
@@ -120,8 +126,11 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
     public void testAdminRole() {
         goTo(getBaseUrl() + "/helloPrivate");
 
+        // Should have been redirected to Simulation login page
+        assertTrue(window().title().contains("Ninja Auth0"));
+        $("#auth0_button").click();
         // Should have been redirected to Auth0 login page
-        assertFalse(window().title().contains("Test"));
+        await().atMost(10, TimeUnit.SECONDS).until(el(".auth0-lock-widget")).present();
         assertTrue(window().title().contains("Sign In with Auth0"));
         login(AUTH0_ADMIN);
 
