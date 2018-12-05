@@ -50,6 +50,8 @@ public class AuthenticateFilter implements Filter {
 
             try {
 
+                logger.debug("ID token found, creating related subject");
+                
                 Subject subject = tokenHandler.buildSubject(context);
                 context.setAttribute(SUBJECT_CTX_KEY, subject);
                 return filterChain.next(context);
@@ -63,6 +65,8 @@ public class AuthenticateFilter implements Filter {
 
         } else {
 
+            logger.debug("ID token not found, saving requested path ({}) and going to login page", context.getRequestPath());
+            
             // No Id Token or Subject = redirect to login page
             context.getSession().put(Auth0Controller.SESSION_TARGET_URL, context.getRequestPath());
             if (ninjaProperties.isProd()) {

@@ -4,6 +4,9 @@ import java.io.UnsupportedEncodingException;
 
 import javax.inject.Named;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.auth0.client.auth.AuthAPI;
 import com.auth0.exception.Auth0Exception;
 import com.auth0.json.auth.TokenHolder;
@@ -29,6 +32,8 @@ import ninja.session.Session;
  * @author jlannoy
  */
 public class Auth0Controller {
+    
+    private final static Logger logger = LoggerFactory.getLogger(Auth0Controller.class);
 
     public static final String SESSION_ID_TOKEN = "id_token";
 
@@ -136,6 +141,7 @@ public class Auth0Controller {
             session.setExpiryTime(token.getExpiresIn() * 1000);
 
             String targetUrl = session.remove(SESSION_TARGET_URL);
+            logger.debug("ID token set, redirecting to requested path ({})", targetUrl);
             return Results.redirect(targetUrl == null ? "/" : targetUrl);
 
         } catch (Auth0Exception e) {
