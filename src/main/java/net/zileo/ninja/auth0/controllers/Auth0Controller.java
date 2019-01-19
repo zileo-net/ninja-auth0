@@ -149,7 +149,7 @@ public class Auth0Controller {
 
             String targetUrl = session.remove(SESSION_TARGET_URL);
             logger.debug("ID token set, redirecting to requested path ({})", targetUrl);
-            return Results.redirect(targetUrl == null ? "/" : targetUrl);
+            return Results.redirect(context.getContextPath() + (targetUrl == null ? "" : targetUrl));
 
         } catch (Auth0Exception e) {
 
@@ -192,7 +192,7 @@ public class Auth0Controller {
 
         if (loggedOutPage != null) {
 
-            return Results.redirect(loggedOutPage);
+            return Results.redirect(context.getContextPath() + loggedOutPage);
 
         } else {
 
@@ -218,7 +218,7 @@ public class Auth0Controller {
         session.put(SESSION_ID_TOKEN, tokenHandler.buildSimulatedJWT(value, Maps.newHashMap()).sign(algorithm));
 
         String targetUrl = session.remove(SESSION_TARGET_URL);
-        return Results.redirect(targetUrl == null ? "/" : targetUrl);
+        return Results.redirect(context.getContextPath() + (targetUrl == null ? "" : targetUrl));
 
     }
 

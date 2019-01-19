@@ -53,12 +53,12 @@
 </head>
 <body>
     <div class="center-div">
-        <form action="/auth0/doSimulate" method="POST">
+        <form action="${contextPath}/auth0/doSimulate" method="POST">
             <h1>Ninja Auth0</h1>
             <input type="text" name="value" placeholder="login" /><br />
             <button type="submit">Simulate</button>
             <hr />
-            <button id="auth0_button" type="button" onClick="location.href='/auth0/login';">Trigger Auth0</button>
+            <button id="auth0_button" type="button" onClick="location.href='${contextPath}/auth0/login';">Trigger Auth0</button>
         </form>
     </div>
 </body>

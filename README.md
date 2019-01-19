@@ -241,6 +241,7 @@ By default, global filters defined in your application are not applied to Ninja 
 * v1.0.0 Initial version
 * v1.1.0 Auto display simulation form for dev and test modes
 * v1.1.2 Configuration property allowing to force HTTPs
+* v1.1.3 Use Ninja's context path if set
 
 ---
 
