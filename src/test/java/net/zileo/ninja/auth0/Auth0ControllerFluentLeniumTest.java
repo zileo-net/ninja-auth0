@@ -3,7 +3,6 @@ package net.zileo.ninja.auth0;
 import static org.fluentlenium.core.filter.FilterConstructor.withClass;
 import static org.fluentlenium.core.filter.FilterConstructor.withName;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.TimeUnit;
@@ -86,7 +85,7 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
 
         await().atMost(10, TimeUnit.SECONDS).until(el(".zileo")).present();
         assertTrue("Should have not been redirected to " + url(), url().contains("helloPrivate"));
-        
+
         checkPrivateAccess(AUTH0_USER, "my_value1");
         logout();
     }
@@ -107,17 +106,19 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
         assertTrue($("h1").first().textContent().equals("403"));
         assertTrue($("p").get(0).textContent().contains("forbidden"));
         assertTrue($("p").get(1).textContent().contains("verified"));
-        
+
         logout();
     }
 
     @Test
     public void testSimulate() {
-        goTo(getBaseUrl() + "/auth0/simulate/" + AUTH0_SIMULATED);
+        goTo(getBaseUrl());
+        await().atMost(10, TimeUnit.SECONDS).until(el(".zileo")).present();
 
+        goTo(getBaseUrl() + "/auth0/simulate/" + AUTH0_SIMULATED);
         await().atMost(10, TimeUnit.SECONDS).until(el(".zileo")).present();
         assertTrue("Should have not been redirected to " + url(), url().isEmpty());
-        
+
         checkPrivateAccess(AUTH0_SIMULATED, "none");
         logout();
     }
@@ -175,7 +176,7 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
         assertEquals(Auth0Subject.class.getName(), el("h2").text());
         assertTrue($("p").get(0).textContent(), $("p").get(0).textContent().contains(AUTH0_ADMIN.equals(user) ? "true" : "false"));
         assertTrue($("p").get(1).textContent(), $("p").get(1).textContent().contains(myClaim));
-        
+
         goTo(getBaseUrl() + "/helloSubject2");
         assertTrue("Should have not been redirected to " + url(), url().contains("helloSubject2"));
         assertTrue(window().title().contains("Test"));
@@ -183,7 +184,7 @@ public class Auth0ControllerFluentLeniumTest extends NinjaFluentLeniumTest {
         assertEquals(Auth0Subject.class.getName(), el("h2").text());
         assertTrue($("p").get(0).textContent(), $("p").get(0).textContent().contains(AUTH0_ADMIN.equals(user) ? "true" : "false"));
         assertTrue($("p").get(1).textContent(), $("p").get(1).textContent().contains(myClaim));
-        
+
         goTo(getBaseUrl() + "/helloSubject.json");
         assertTrue("Should have not been redirected to " + url(), url().contains("helloSubject.json"));
     }

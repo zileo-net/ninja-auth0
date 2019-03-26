@@ -38,7 +38,7 @@ public class Auth0SubjectTokenHandlerTest {
 
     @Test
     public void testGenerateToken() {
-        String idToken = handler.buildSimulatedJWT(USER_EMAIL, Maps.newHashMap()).sign(algorithm);
+        String idToken = handler.buildSimulatedJWT(null, USER_EMAIL, Maps.newHashMap()).sign(algorithm);
         assertNotNull(idToken);
         logger.info("JWT = {}", idToken);
 
@@ -48,12 +48,12 @@ public class Auth0SubjectTokenHandlerTest {
         String email = handler.getEmail(jwt);
         assertNotNull(email);
         assertEquals(USER_EMAIL, email);
-        
+
         String userId = handler.getUserId(jwt);
         assertNotNull(userId);
         assertEquals(USER_EMAIL, userId);
-        
-        Auth0Subject user = handler.buildSubject(idToken);
+
+        Auth0Subject user = handler.buildSubject(null, idToken);
         assertNotNull(user);
         assertEquals(USER_EMAIL, user.getEmail());
     }

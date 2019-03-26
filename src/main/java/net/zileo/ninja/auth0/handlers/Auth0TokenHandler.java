@@ -12,8 +12,9 @@ import net.zileo.ninja.auth0.subject.Subject;
 import ninja.Context;
 
 /**
- * This is your base Subject / profile generator. Extends this class by specifying your User class (implementing the Subject interface). Based on the decoded Json Web Token, grab the claims you need
- * to build one instance of your authenticated user. By using the {@link Auth0} annotation on your controllers methods, you'll be able to get it back.
+ * This is your base Subject / profile generator. Extends this class by specifying your User class (implementing the
+ * Subject interface). Based on the decoded Json Web Token, grab the claims you need to build one instance of your
+ * authenticated user. By using the {@link Auth0} annotation on your controllers methods, you'll be able to get it back.
  * 
  * @author jlannoy
  */
@@ -46,7 +47,8 @@ public abstract class Auth0TokenHandler<P extends Subject> {
     }
 
     /**
-     * Checks the ID Token, decodes it, then call {@link Auth0TokenHandler#buildSubjectFromJWT(DecodedJWT, String)}.
+     * Checks the ID Token, decodes it, then call
+     * {@link Auth0TokenHandler#buildSubjectFromJWT(Context, DecodedJWT, String)}.
      * 
      * @param context
      *            Ninja's current context
@@ -56,20 +58,23 @@ public abstract class Auth0TokenHandler<P extends Subject> {
      */
     public final P buildSubject(Context context) throws IllegalArgumentException {
 
-        return this.buildSubject(context.getSession().get(Auth0Controller.SESSION_ID_TOKEN));
+        return this.buildSubject(context, context.getSession().get(Auth0Controller.SESSION_ID_TOKEN));
 
     }
 
     /**
-     * Checks the ID Token, decodes it, then call {@link Auth0TokenHandler#buildSubjectFromJWT(DecodedJWT, String)}.
+     * Checks the ID Token, decodes it, then call
+     * {@link Auth0TokenHandler#buildSubjectFromJWT(Context, DecodedJWT, String)}.
      * 
+     * @param context
+     *            Ninja's current context
      * @param idToken
      *            Auth0 Id Token
      * @throws IllegalArgumentException
      *             if a mandatory data is missing
      * @return authenticated User
      */
-    public final P buildSubject(String idToken) throws IllegalArgumentException {
+    public final P buildSubject(Context context, String idToken) throws IllegalArgumentException {
 
         if (idToken == null) {
             throw new IllegalArgumentException("No Id Token provided");
@@ -85,7 +90,7 @@ public abstract class Auth0TokenHandler<P extends Subject> {
             throw new IllegalArgumentException("No User Id in provided Id Token");
         }
 
-        P subject = buildSubjectFromJWT(jwt, userId);
+        P subject = buildSubjectFromJWT(context, jwt, userId);
         if (subject == null) {
             throw new IllegalArgumentException("Unable to create Subject from provided Id Token");
         }
@@ -97,24 +102,28 @@ public abstract class Auth0TokenHandler<P extends Subject> {
     /**
      * Implement this method to build your Subject.
      * 
+     * @param context
+     *            Ninja's current context
      * @param jwt
      *            a JSON Web Token
      * @param userId
      *            user id (as a String)
      * @return authenticated User
      */
-    public abstract P buildSubjectFromJWT(DecodedJWT jwt, String userId);
+    public abstract P buildSubjectFromJWT(Context context, DecodedJWT jwt, String userId);
 
     /**
      * Creates a fake web token (for the simulated dev/test action).
      * 
+     * @param context
+     *            Ninja's current context
      * @param value
      *            a user id or email (depending on client choice)
      * @param additionalClaims
      *            additional claims of the simulated user
      * @return a JWT
      */
-    public Builder buildSimulatedJWT(String value, Map<String, String> additionalClaims) {
+    public Builder buildSimulatedJWT(Context context, String value, Map<String, String> additionalClaims) {
 
         Builder builder = JWT.create().withClaim(Auth0TokenHandler.CLAIM_SUBJECT, value).withClaim(Auth0TokenHandler.CLAIM_SIMULATED, Boolean.TRUE);
 

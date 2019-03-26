@@ -178,7 +178,7 @@ Then, you'll need to provide your own an implementation of a `Auth0TokenHandler`
     
         @Transactional
         @Override
-        public User buildSubjectFromEmail(DecodedJWT jwt, String userId, String email) {
+        public User buildSubjectFromEmail(Context context, DecodedJWT jwt, String userId, String email) {
     
             EntityManager em = emProvider.get();
     
@@ -242,6 +242,7 @@ By default, global filters defined in your application are not applied to Ninja 
 * v1.1.0 Auto display simulation form for dev and test modes
 * v1.1.2 Configuration property allowing to force HTTPs
 * v1.1.3 Use Ninja's context path if set
+* v1.2.0 Context availability in subject builder + session cleared on IllegalArgumentException
 
 ---
 

@@ -6,9 +6,11 @@ import com.auth0.jwt.JWTCreator.Builder;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import net.zileo.ninja.auth0.subject.Subject;
+import ninja.Context;
 
 /**
- * Same as {@link Auth0TokenHandler} but with a little shortcut allowing to generate a Subject based on a given verified email address.
+ * Same as {@link Auth0TokenHandler} but with a little shortcut allowing to generate a Subject based on a given verified
+ * email address.
  * 
  * @author jlannoy
  */
@@ -55,16 +57,17 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
     }
 
     /**
-     * @see net.zileo.ninja.auth0.handlers.Auth0TokenHandler#buildSubjectFromJWT(com.auth0.jwt.interfaces.DecodedJWT, java.lang.String)
+     * @see net.zileo.ninja.auth0.handlers.Auth0TokenHandler#buildSubjectFromJWT(ninja.Context,
+     *      com.auth0.jwt.interfaces.DecodedJWT, java.lang.String)
      */
     @Override
-    public P buildSubjectFromJWT(DecodedJWT jwt, String userId) {
+    public P buildSubjectFromJWT(Context context, DecodedJWT jwt, String userId) {
 
         if (!isVerifiedEmail(jwt)) {
             throw new IllegalArgumentException("E-mail adress not (yet) verified");
         }
 
-        return buildSubjectFromEmail(jwt, userId, getEmail(jwt));
+        return buildSubjectFromEmail(context, jwt, userId, getEmail(jwt));
 
     }
 
@@ -79,7 +82,7 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
      *            user email
      * @return authenticated User
      */
-    public abstract P buildSubjectFromEmail(DecodedJWT jwt, String userId, String email);
+    public abstract P buildSubjectFromEmail(Context context, DecodedJWT jwt, String userId, String email);
 
     /**
      * Creates a fake web token (for the simulated dev/test action).
@@ -91,8 +94,8 @@ public abstract class Auth0EmailHandler<P extends Subject> extends Auth0TokenHan
      * @return a JWT
      */
     @Override
-    public Builder buildSimulatedJWT(String value, Map<String, String> additionalClaims) {
-        return super.buildSimulatedJWT(value, additionalClaims).withClaim(CLAIM_EMAIL, value).withClaim(CLAIM_EMAIL_VERIFIED, Boolean.TRUE);
+    public Builder buildSimulatedJWT(Context context, String value, Map<String, String> additionalClaims) {
+        return super.buildSimulatedJWT(context, value, additionalClaims).withClaim(CLAIM_EMAIL, value).withClaim(CLAIM_EMAIL_VERIFIED, Boolean.TRUE);
     }
 
 }

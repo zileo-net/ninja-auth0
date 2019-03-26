@@ -7,6 +7,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.inject.Inject;
 
 import net.zileo.ninja.auth0.handlers.Auth0EmailHandler;
+import ninja.Context;
 
 public class Auth0SubjectTokenHandler extends Auth0EmailHandler<Auth0Subject> {
 
@@ -15,7 +16,7 @@ public class Auth0SubjectTokenHandler extends Auth0EmailHandler<Auth0Subject> {
     private String claimsNamespace;
 
     @Override
-    public Auth0Subject buildSubjectFromEmail(DecodedJWT jwt, String userId, String email) {
+    public Auth0Subject buildSubjectFromEmail(Context context, DecodedJWT jwt, String userId, String email) {
         Auth0Subject subject = new Auth0Subject(userId, email);
 
         if (claimsNamespace != null) {

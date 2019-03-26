@@ -55,10 +55,7 @@ public class Auth0Controller {
     private Algorithm algorithm;
 
     @Inject
-    public void init(NinjaProperties properties,
-                     @Named("auth0.domain") String domain,
-                     @Named("auth0.clientId") String clientId,
-                     @Named("auth0.clientSecret") String clientSecret)
+    public void init(NinjaProperties properties, @Named("auth0.domain") String domain, @Named("auth0.clientId") String clientId, @Named("auth0.clientSecret") String clientSecret)
             throws IllegalArgumentException, UnsupportedEncodingException {
 
         this.auth = new AuthAPI(domain, clientId, clientSecret);
@@ -78,8 +75,7 @@ public class Auth0Controller {
      */
     protected String getCallbackUrl(Context context) {
 
-        return reverseRouter.with(Auth0Controller::callback)
-                .absolute(forceHttps ? "https" : context.getScheme(), context.getHostname()).build();
+        return reverseRouter.with(Auth0Controller::callback).absolute(forceHttps ? "https" : context.getScheme(), context.getHostname()).build();
 
     }
 
@@ -92,8 +88,7 @@ public class Auth0Controller {
      */
     protected String getLoggedOutUrl(Context context) {
 
-        return reverseRouter.with(Auth0Controller::loggedOut)
-                .absolute(forceHttps ? "https" : context.getScheme(), context.getHostname()).build();
+        return reverseRouter.with(Auth0Controller::loggedOut).absolute(forceHttps ? "https" : context.getScheme(), context.getHostname()).build();
 
     }
 
@@ -107,7 +102,9 @@ public class Auth0Controller {
      * @return a request Result
      */
     public Result login(Context context, Session session) {
+
         return Results.redirect(auth.authorizeUrl(getCallbackUrl(context)).withResponseType("code").withScope(tokenHandler.getScope()).build());
+
     }
 
     /**
@@ -136,10 +133,11 @@ public class Auth0Controller {
             // Check that we are able to provision one Subject from the received id token
             try {
 
-                tokenHandler.buildSubject(token.getIdToken());
+                tokenHandler.buildSubject(context, token.getIdToken());
 
             } catch (IllegalArgumentException e) {
 
+                session.clear();
                 throw new ForbiddenRequestException(e.getMessage(), e);
 
             }
@@ -215,9 +213,14 @@ public class Auth0Controller {
      */
     public Result simulate(Context context, Session session, @PathParam("value") String value) {
 
-        session.put(SESSION_ID_TOKEN, tokenHandler.buildSimulatedJWT(value, Maps.newHashMap()).sign(algorithm));
+        if (value == null) {
+            throw new IllegalArgumentException("Empty simulated value");
+        }
+
+        session.put(SESSION_ID_TOKEN, tokenHandler.buildSimulatedJWT(context, value, Maps.newHashMap()).sign(algorithm));
 
         String targetUrl = session.remove(SESSION_TARGET_URL);
+        logger.debug("ID token set, redirecting to requested path ({})", targetUrl);
         return Results.redirect(context.getContextPath() + (targetUrl == null ? "" : targetUrl));
 
     }
